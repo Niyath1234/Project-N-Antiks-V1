@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antiks-v1 Training Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-card .value {
+            color: #667eea;
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .status-idle { background: #e0e0e0; color: #666; }
+        .status-running { background: #4CAF50; color: white; }
+        .status-training { background: #2196F3; color: white; }
+        .status-completed { background: #FF9800; color: white; }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .challenge-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+        
+        .challenge-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .challenge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .challenge-number {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        .score-badge {
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        
+        .score-low { background: #ffebee; color: #c62828; }
+        .score-medium { background: #fff3e0; color: #e65100; }
+        .score-high { background: #e8f5e9; color: #2e7d32; }
+        .score-perfect { background: #e8f5e9; color: #1b5e20; }
+        
+        .question {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-style: italic;
+            color: #555;
+        }
+        
+        .sql-block {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        
+        .label {
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 10px;
+            display: block;
+        }
+        
+        .feedback {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            color: #856404;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .live-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #4CAF50;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+    <div class="container">
+        <header>
+            <h1>🎓 Antiks-v1 Training Monitor</h1>
+            <p>Watch the teacher-student active learning in real-time</p>
+            <div class="status-badge" :class="'status-' + status.toLowerCase()" id="status">
+                <span class="live-indicator" v-if="status !== 'idle'"></span>
+                {{ statusText }}
+            </div>
+        </header>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Iteration</h3>
+                <div class="value">{{ iteration }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Questions</h3>
+                <div class="value">{{ stats.total_questions }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Correct Answers</h3>
+                <div class="value">{{ stats.correct_answers }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Training Examples</h3>
+                <div class="value">{{ stats.training_examples }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Avg Score</h3>
+                <div class="value">{{ stats.avg_score.toFixed(1) }}</div>
+            </div>
+        </div>
+        
+        <div class="progress-bar" v-if="stats.total_questions > 0">
+            <div class="progress-fill" :style="{width: (stats.total_questions / 100 * 100) + '%'}"></div>
+        </div>
+        
+        <div class="main-grid">
+            <div class="panel">
+                <h2>📊 Recent Challenges</h2>
+                
+                <div v-if="history.length === 0" class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    <p>No challenges yet. Start training to see activity here.</p>
+                </div>
+                
+                <div v-for="(challenge, idx) in history.slice().reverse()" :key="idx" class="challenge-item">
+                    <div class="challenge-header">
+                        <span class="challenge-number">Challenge #{{ challenge.challenge }}</span>
+                        <span v-if="challenge.score !== undefined" 
+                              class="score-badge" 
+                              :class="getScoreClass(challenge.score)">
+                            {{ challenge.score }}/100
+                        </span>
+                    </div>
+                    
+                    <span class="label">❓ Question:</span>
+                    <div class="question">{{ challenge.question }}</div>
+                    
+                    <span v-if="challenge.student_answer" class="label">🎓 Student Answer:</span>
+                    <div v-if="challenge.student_answer" class="sql-block">{{ challenge.student_answer }}</div>
+                    
+                    <span v-if="challenge.feedback" class="label">💬 Teacher Feedback:</span>
+                    <div v-if="challenge.feedback" class="feedback">{{ challenge.feedback }}</div>
+                    
+                    <span v-if="challenge.corrected_sql" class="label">✅ Corrected SQL:</span>
+                    <div v-if="challenge.corrected_sql" class="sql-block">{{ challenge.corrected_sql }}</div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>📈 Learning Progress</h2>
+                
+                <div v-if="history.length === 0" class="empty-state">
+                    <p>Training statistics will appear here</p>
+                </div>
+                
+                <div v-else>
+                    <div class="stat-card" style="margin-bottom: 20px;">
+                        <h3>Success Rate</h3>
+                        <div class="value">{{ getSuccessRate() }}%</div>
+                    </div>
+                    
+                    <div class="stat-card" style="margin-bottom: 20px;">
+                        <h3>Learning Efficiency</h3>
+                        <div class="value">{{ getLearningEfficiency() }}%</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3>Current Iteration</h3>
+                        <div class="value">{{ iteration }}</div>
+                    </div>
+                </div>
+                
+                <div class="controls" style="margin-top: 30px;">
+                    <button @click="reset()" :disabled="status === 'running' || status === 'training'">
+                        🔄 Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp } = Vue;
+        
+        createApp({
+            data() {
+                return {
+                    status: 'idle',
+                    iteration: 0,
+                    stats: {
+                        total_questions: 0,
+                        correct_answers: 0,
+                        training_examples: 0,
+                        avg_score: 0
+                    },
+                    history: [],
+                    updateInterval: null
+                }
+            },
+            computed: {
+                statusText() {
+                    const texts = {
+                        'idle': 'Ready',
+                        'running': 'Processing Challenges',
+                        'training': 'Training Model',
+                        'completed': 'Completed'
+                    };
+                    return texts[this.status] || 'Unknown';
+                }
+            },
+            mounted() {
+                this.updateStatus();
+                this.updateInterval = setInterval(this.updateStatus, 2000); // Update every 2 seconds
+            },
+            beforeUnmount() {
+                if (this.updateInterval) {
+                    clearInterval(this.updateInterval);
+                }
+            },
+            methods: {
+                async updateStatus() {
+                    try {
+                        const response = await fetch('/api/status');
+                        const data = await response.json();
+                        
+                        this.status = data.status;
+                        this.iteration = data.iteration;
+                        this.stats = data.stats;
+                        this.history = data.history || [];
+                    } catch (error) {
+                        console.error('Error fetching status:', error);
+                    }
+                },
+                getScoreClass(score) {
+                    if (score >= 90) return 'score-perfect';
+                    if (score >= 70) return 'score-high';
+                    if (score >= 50) return 'score-medium';
+                    return 'score-low';
+                },
+                getSuccessRate() {
+                    if (this.stats.total_questions === 0) return 0;
+                    return ((this.stats.correct_answers / this.stats.total_questions) * 100).toFixed(1);
+                },
+                getLearningEfficiency() {
+                    if (this.stats.total_questions === 0) return 0;
+                    return ((this.stats.training_examples / this.stats.total_questions) * 100).toFixed(1);
+                },
+                async reset() {
+                    try {
+                        await fetch('/api/reset', { method: 'POST' });
+                        this.updateStatus();
+                    } catch (error) {
+                        console.error('Error resetting:', error);
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
+

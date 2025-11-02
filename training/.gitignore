@@ -1,0 +1,38 @@
+# Training artifacts (large files)
+*.gguf
+*.bin
+*.safetensors
+*.pth
+*.pt
+
+# Training data
+train_data_*.jsonl
+sample_examples.json
+
+# Model outputs
+output/
+checkpoints/
+logs/
+
+# Evaluation results
+evaluation_results.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# TensorBoard
+events.out.tfevents.*
+
+# Temporary
+*.tmp
+*.log
+*.cache
+
